@@ -1,28 +1,55 @@
-# Create T3 App
+# T3 Stack を使ってブログを作るデモ用リポジトリ
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+といっても、この中に入ってるものは `create-t3-app` で作成したリポジトリの一部を修正しただけのもの。
 
-## What's next? How do I make an app with this?
+## 手順
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+```sh
+git clone
+cp .env.example .env
+pnpm i
+pnpm prisma db push
+```
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+### スキーマ変更
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+1. `prisma/schema.prisma` を変更する
+2. `pnpm prisma migrate dev` を実行する
+3. VSCodeを使っている場合はコマンドで `TypeScript: Restart TS Server` を実行する
 
-## Learn More
+注: prismaはインストールしているprisma clientを書き換えているので、Restart TS Serverをしないと、更新したことを認識してくれない。
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+### APIを作る
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+`src/server/api/routers/example.ts` を元に postRouter を作る
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+* コードが無い状態で生成しようとすると少し面倒になるので、exampleRouterのコードを活かしたまま、最初のAPIを作ると楽
+* tRPCの場合、参照は `query` で更新は `mutation` となっているが、まだ何も覚えてない状態でのCopilotは、更新も `query` にしようとしてくるので `mutation` を覚えさせる必要がある
+* `read` とか `create` ってメソッド生やしたら `update` `delete` なども生やしてくれる
+* CopilotはPrismaの使い方大体知ってる
 
-## How do I deploy this?
+### トップページを作る
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+`src/pages/index.tsx` を書き換える
+
+* いらないモノを削る
+* `const { data } = api.list` まで入力するとある程度察してくれる
+* `<Link href` で大体察して New Post のコードを書いてくれる
+* Next.js の古い書き方をするので `<a>` を削る
+* ついでに `flex flex-col gap-10 m-10` で装飾しておく
+
+### 投稿ページを作る
+
+サジェストに従ってたぶん `/posts/new` あたりになると思うので、それに対応するコンポーネントを作る
+
+* `export deafult function ` で大体察してくれるが、関数名がそれっぽくなかったらそれっぽくなるようにする
+* この時点ではおそらく `api` を読み込んでないので、読み込むようにしたり `const { data } = api.post.create.` くらいまでは誘導してあげる必要あるかも
+* トップページである程度装飾してると、ここでも投稿画面をそれっぽく装飾してくれるのでそれにしたがう
+* 戻るリンクをつける
+
+### 詳細ページを作る
+
+投稿ページを作って、投稿したら、トップページにタイトルが出てくるようになってるはず
+
+* 各投稿から、個々の詳細ページに飛べるようにする
+* 詳細ページを作成する
